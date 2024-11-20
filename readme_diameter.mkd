@@ -1,0 +1,10 @@
+# Guia de como rodar
+
+Para o: social_network_diameter.cpp
+compile com: g++ social_network_diameter.cpp  -o social_network_diameter
+execute com: ./social_network_diameter nome_do_arquivo.txt 
+
+Para o: social_network_effective_diameter.cpp
+compile com: g++ social_network_effective_diameter.cpp -o social_network_effective_diameter
+execute com: ./social_network_effective_diameter nome_do_arquivo.txt 
+
