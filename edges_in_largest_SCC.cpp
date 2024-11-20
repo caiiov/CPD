@@ -7,6 +7,7 @@
 #include <sstream>
 #include <stack>
 #include <unordered_map>
+#include <unordered_set>
 #include <algorithm>
 
 namespace fs = std::filesystem;
@@ -50,10 +51,11 @@ int main() {
         std::string directory = "./facebook";
         std::unordered_map<int, std::vector<int>> adj;
         std::set<std::pair<int, int>> uniqueEdges;
+        std::unordered_set<int> allNodes; // Todos os nós
         std::vector<std::vector<int>> SCCs;
 
         for (const auto& entry : fs::directory_iterator(directory)) {
-            if (entry.path().extension() == ".edges") {
+            if (entry.path().extension() == ".edges" || entry.path().filename() == "facebook_combined.txt") {
                 std::ifstream file(entry.path());
                 if (!file.is_open()) {
                     std::cerr << "Não foi possível abrir o arquivo: " << entry.path().string() << "\n";
@@ -70,13 +72,24 @@ int main() {
                     }
 
                     adj[u].push_back(v);
+                    adj[v].push_back(u);
                     uniqueEdges.insert(normalizeEdge(u, v));
+                    allNodes.insert(u);
+                    allNodes.insert(v);
                 }
 
                 file.close();
             }
         }
 
+        // Garante que todos os nós estão no grafo, mesmo que estejam isolados
+        for (int node : allNodes) {
+            if (adj.find(node) == adj.end()) {
+                adj[node] = {}; // Adiciona nó isolado
+            }
+        }
+
+        // Passo 1: Ordenação topológica
         std::stack<int> Stack;
         std::unordered_map<int, bool> visited;
 
@@ -86,9 +99,11 @@ int main() {
             }
         }
 
+        // Passo 2: Transpor o grafo
         std::unordered_map<int, std::vector<int>> transpose = getTranspose(adj);
-        visited.clear();
 
+        // Passo 3: Encontrar SCCs no grafo transposto
+        visited.clear();
         while (!Stack.empty()) {
             int v = Stack.top();
             Stack.pop();
@@ -99,6 +114,7 @@ int main() {
             }
         }
 
+        // Identificar o maior SCC
         std::vector<int> largestSCC;
         for (const auto& component : SCCs) {
             if (component.size() > largestSCC.size()) {
@@ -106,9 +122,11 @@ int main() {
             }
         }
 
+        // Contar as arestas no maior SCC
         int edgeCount = 0;
         std::set<int> largestSCCSet(largestSCC.begin(), largestSCC.end());
         std::set<std::pair<int, int>> countedEdges;
+
         for (const auto& node : largestSCC) {
             for (const auto& neighbor : adj[node]) {
                 if (largestSCCSet.count(neighbor) && !countedEdges.count(normalizeEdge(node, neighbor))) {
@@ -118,9 +136,10 @@ int main() {
             }
         }
 
+        // Calculando a proporção
         double edgeRatio = static_cast<double>(edgeCount) / uniqueEdges.size();
 
-        // Mostrar resultado total
+        // Exibir resultado
         std::cout << "Total de arestas no maior SCC: " << edgeCount << " (" << edgeRatio << ")\n";
 
     } catch (const std::exception& ex) {
