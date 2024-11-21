@@ -1,4 +1,4 @@
-#GUIA
+# GUIA
 
 
 ## Diametro, Diametro Efetivo 
@@ -14,7 +14,7 @@ execute com:
 ./social_network_diameter nome_do_arquivo.txt 
 ```
 
-Para o: social_network_effective_diameter.cpp
+Para o: `social_network_effective_diameter.cpp`
 compile com: 
 ```bash
 g++ social_network_effective_diameter.cpp -o social_network_effective_diameter
@@ -39,7 +39,7 @@ execute with:
 ./social_network_diameter nome_do_arquivo.txt 
 ```
 
-For: social_network_effective_diameter.cpp
+For: `social_network_effective_diameter.cpp`
 compile with: 
 ```bash
 g++ social_network_effective_diameter.cpp -o social_network_effective_diameter
