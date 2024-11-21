@@ -1,15 +1,11 @@
 #include <iostream>
 #include <vector>
-#include <unordered_set>
-#include <unordered_map>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <algorithm> // Para std::max_element
-#include <filesystem> // Para manipular arquivos e diretórios (C++17)
 
 using namespace std;
-namespace fs = std::filesystem;
 
 // Função para calcular o coeficiente de agrupamento de um nó
 double clusteringCoefficient(int node, const vector<vector<int>>& graph) {
@@ -39,7 +35,7 @@ double clusteringCoefficient(int node, const vector<vector<int>>& graph) {
     return (2.0 * triangles) / (degree * (degree - 1));
 }
 
-// Função para ler um arquivo e construir o grafo
+// Função para ler o arquivo "facebook_combined.txt" e construir o grafo
 void readGraphFile(const string& filePath, vector<vector<int>>& graph) {
     ifstream file(filePath);
     if (!file.is_open()) {
@@ -70,20 +66,11 @@ void readGraphFile(const string& filePath, vector<vector<int>>& graph) {
 int main() {
     vector<vector<int>> graph;
 
-    string folderPath = "facebook";
+    string filePath = "facebook_combined.txt";
 
-    // Lê todos os arquivos na pasta "facebook"
-    for (const auto& entry : fs::directory_iterator(folderPath)) {
-        if (entry.is_regular_file()) {
-            string filePath = entry.path().string();
-
-            // Verifica se é o arquivo "facebook_combined.txt" ou outros arquivos
-            if (filePath.find("facebook_combined.txt") != string::npos || filePath.find(".txt") != string::npos) {
-                cout << "Lendo arquivo: " << filePath << endl;
-                readGraphFile(filePath, graph);
-            }
-        }
-    }
+    // Lê o arquivo "facebook_combined.txt"
+    cout << "Lendo arquivo: " << filePath << endl;
+    readGraphFile(filePath, graph);
 
     // Calcula o coeficiente de agrupamento médio
     double totalClustering = 0.0;
