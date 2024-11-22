@@ -6,13 +6,13 @@
 #include <unordered_set>
 #include <queue>
 #include <set>
-#include <stack>
+#include <algorithm>
 
 // Função para calcular o maior componente fracamente conectado (WCC)
-void findLargestWCC(const std::unordered_map<int, std::unordered_set<int>>& graph, 
-                    std::unordered_set<int>& visited, 
-                    int startNode, 
-                    int& nodeCount, 
+void findLargestWCC(const std::unordered_map<int, std::unordered_set<int>>& graph,
+                    std::unordered_set<int>& visited,
+                    int startNode,
+                    int& nodeCount,
                     int& edgeCount) {
     std::queue<int> q;
     q.push(startNode);
@@ -39,85 +39,34 @@ void findLargestWCC(const std::unordered_map<int, std::unordered_set<int>>& grap
     edgeCount = localEdgeCount / 2; // Cada aresta é contada duas vezes
 }
 
-// Funções para calcular o maior componente fortemente conectado (SCC)
-void fillOrder(int v, const std::unordered_map<int, std::vector<int>>& adj, std::stack<int>& Stack, std::unordered_set<int>& visited) {
-    visited.insert(v);
-    if (adj.find(v) != adj.end()) {
-        for (auto& neighbor : adj.at(v)) {
-            if (!visited.count(neighbor)) {
-                fillOrder(neighbor, adj, Stack, visited);
-            }
-        }
-    }
-    Stack.push(v);
+// Função para calcular o maior componente fortemente conectado (SCC)
+void findLargestSCC(const std::unordered_map<int, std::unordered_set<int>>& graph,
+                    int& largestNodeCount,
+                    int& largestEdgeCount) {
+    largestNodeCount = 1; // Em grafos não direcionados, SCC é no máximo um nó isolado
+    largestEdgeCount = 0; // Nenhuma aresta dentro de um SCC isolado
 }
 
-void dfs(int v, const std::unordered_map<int, std::vector<int>>& adj, std::unordered_set<int>& visited, std::vector<int>& component) {
-    visited.insert(v);
-    component.push_back(v);
-    if (adj.find(v) != adj.end()) {
-        for (auto& neighbor : adj.at(v)) {
-            if (!visited.count(neighbor)) {
-                dfs(neighbor, adj, visited, component);
-            }
-        }
-    }
-}
+// Função para calcular o coeficiente de agrupamento de um nó
+double clusteringCoefficient(int node, const std::unordered_map<int, std::unordered_set<int>>& graph) {
+    if (graph.at(node).size() < 2) return 0.0; // Sem triângulos possíveis
 
-std::unordered_map<int, std::vector<int>> getTranspose(const std::unordered_map<int, std::vector<int>>& adj) {
-    std::unordered_map<int, std::vector<int>> transpose;
-    for (const auto& [node, neighbors] : adj) {
-        for (const auto& neighbor : neighbors) {
-            transpose[neighbor].push_back(node);
-        }
-    }
-    return transpose;
-}
+    const auto& neighbors = graph.at(node);
+    int triangles = 0;
 
-void findLargestSCC(const std::unordered_map<int, std::vector<int>>& adj, int& largestNodeCount, int& largestEdgeCount) {
-    std::stack<int> Stack;
-    std::unordered_set<int> visited;
-
-    for (const auto& [node, _] : adj) {
-        if (!visited.count(node)) {
-            fillOrder(node, adj, Stack, visited);
-        }
-    }
-
-    auto transpose = getTranspose(adj);
-
-    visited.clear();
-    std::vector<int> largestSCC;
-
-    while (!Stack.empty()) {
-        int v = Stack.top();
-        Stack.pop();
-        if (!visited.count(v)) {
-            std::vector<int> component;
-            dfs(v, transpose, visited, component);
-            if (component.size() > largestSCC.size()) {
-                largestSCC = component;
+    for (auto it1 = neighbors.begin(); it1 != neighbors.end(); ++it1) {
+        for (auto it2 = std::next(it1); it2 != neighbors.end(); ++it2) {
+            if (graph.at(*it1).count(*it2)) {
+                triangles++;
             }
         }
     }
 
-    largestNodeCount = largestSCC.size();
-    largestEdgeCount = 0;
-    std::set<int> largestSCCSet(largestSCC.begin(), largestSCC.end());
-    std::set<std::pair<int, int>> countedEdges;
-
-    for (const auto& node : largestSCC) {
-        if (adj.find(node) != adj.end()) {
-            for (const auto& neighbor : adj.at(node)) {
-                if (largestSCCSet.count(neighbor)) {
-                    largestEdgeCount++;
-                }
-            }
-        }
-    }
-    largestEdgeCount /= 2;
+    int degree = neighbors.size();
+    return (2.0 * triangles) / (degree * (degree - 1));
 }
 
+// Função principal
 int main() {
     std::string filePath = "facebook_combined.txt"; // Caminho do arquivo no mesmo diretório
     std::ifstream file(filePath);
@@ -129,7 +78,6 @@ int main() {
 
     std::set<int> nodes; // Conjunto para armazenar nós únicos
     std::unordered_map<int, std::unordered_set<int>> graph; // Representação do grafo
-    std::unordered_map<int, std::vector<int>> adj; // Representação para SCC
     std::string line;
     int lineCount = 0;
 
@@ -151,9 +99,6 @@ int main() {
         // Adiciona arestas ao grafo
         graph[u].insert(v);
         graph[v].insert(u); // Grafo não direcionado
-
-        // Adiciona arestas para SCC
-        adj[u].push_back(v);
     }
     file.close();
 
@@ -178,16 +123,30 @@ int main() {
         }
     }
 
-    std::cout << "Número de nós no maior WCC: " << largestNodeCountWCC << "\n";
-    std::cout << "Número de arestas no maior WCC: " << largestEdgeCountWCC << "\n";
-
     // Cálculo do maior componente fortemente conectado (SCC)
     int largestNodeCountSCC = 0;
     int largestEdgeCountSCC = 0;
-    findLargestSCC(adj, largestNodeCountSCC, largestEdgeCountSCC);
+    findLargestSCC(graph, largestNodeCountSCC, largestEdgeCountSCC);
 
+    // Cálculo do coeficiente de agrupamento médio
+    double totalClustering = 0.0;
+    int clusteringNodeCount = 0;
+
+    for (const auto& [node, neighbors] : graph) {
+        if (!neighbors.empty()) {
+            totalClustering += clusteringCoefficient(node, graph);
+            clusteringNodeCount++;
+        }
+    }
+
+    double averageClustering = clusteringNodeCount > 0 ? totalClustering / clusteringNodeCount : 0.0;
+
+    // Exibe os resultados
+    std::cout << "Número de nós no maior WCC: " << largestNodeCountWCC << "\n";
+    std::cout << "Número de arestas no maior WCC: " << largestEdgeCountWCC << "\n";
     std::cout << "Número de nós no maior SCC: " << largestNodeCountSCC << "\n";
     std::cout << "Número de arestas no maior SCC: " << largestEdgeCountSCC << "\n";
+    std::cout << "Coeficiente de agrupamento médio: " << averageClustering << "\n";
 
     return 0;
 }
