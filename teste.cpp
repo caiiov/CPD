@@ -6,6 +6,7 @@
 #include <unordered_set>
 #include <queue>
 #include <set>
+#include <climits>
 #include <algorithm>
 
 // Função para calcular o maior componente fracamente conectado (WCC)
@@ -64,6 +65,107 @@ double clusteringCoefficient(int node, const std::unordered_map<int, std::unorde
 
     int degree = neighbors.size();
     return (2.0 * triangles) / (degree * (degree - 1));
+}
+
+// Função para contar o número de triângulos no grafo
+int countTriangles(const std::unordered_map<int, std::unordered_set<int>>& graph) {
+    int triangleCount = 0;
+
+    for (const auto& [node, neighbors] : graph) {
+        for (auto it1 = neighbors.begin(); it1 != neighbors.end(); ++it1) {
+            for (auto it2 = std::next(it1); it2 != neighbors.end(); ++it2) {
+                if (graph.at(*it1).count(*it2)) {
+                    triangleCount++;
+                }
+            }
+        }
+    }
+
+    return triangleCount / 3; // Cada triângulo é contado três vezes
+}
+
+// Função para contar o número de triângulos fechados
+int countClosedTriangles(const std::unordered_map<int, std::unordered_set<int>>& graph) {
+    int triangleCount = 0;
+
+    for (const auto& [node, neighbors] : graph) {
+        for (auto it1 = neighbors.begin(); it1 != neighbors.end(); ++it1) {
+            for (auto it2 = std::next(it1); it2 != neighbors.end(); ++it2) {
+                if (graph.at(*it1).count(*it2)) {
+                    // Verifica se o triângulo é fechado
+                    if (graph.at(node).count(*it1) && graph.at(node).count(*it2)) {
+                        triangleCount++;
+                    }
+                }
+            }
+        }
+    }
+
+    return triangleCount / 3; // Cada triângulo fechado é contado três vezes
+}
+
+// Função para contar o número de triângulos possíveis (não fechados)
+int countPossibleTriangles(const std::unordered_map<int, std::unordered_set<int>>& graph) {
+    int possibleTriangleCount = 0;
+
+    for (const auto& [node, neighbors] : graph) {
+        for (auto it1 = neighbors.begin(); it1 != neighbors.end(); ++it1) {
+            for (auto it2 = std::next(it1); it2 != neighbors.end(); ++it2) {
+                if (graph.at(*it1).count(*it2) || graph.at(node).count(*it1) || graph.at(node).count(*it2)) {
+                    possibleTriangleCount++;
+                }
+            }
+        }
+    }
+
+    return possibleTriangleCount / 3; // Cada triângulo possível é contado três vezes
+}
+
+// Função para calcular a fração de triângulos fechados
+double fractionOfClosedTriangles(const std::unordered_map<int, std::unordered_set<int>>& graph) {
+    int numClosedTriangles = countClosedTriangles(graph);
+    int numPossibleTriangles = countPossibleTriangles(graph);
+
+    if (numPossibleTriangles == 0) return 0.0;
+    return static_cast<double>(numClosedTriangles) / numPossibleTriangles;
+}
+
+// Função para calcular o diâmetro do grafo
+int calculateDiameter(const std::unordered_map<int, std::unordered_set<int>>& graph) {
+    int diameter = 0;
+
+    // Função BFS para encontrar a maior distância entre dois nós
+    auto bfs = [&graph](int start) {
+        std::unordered_map<int, int> distances;
+        std::queue<int> q;
+        q.push(start);
+        distances[start] = 0;
+
+        while (!q.empty()) {
+            int node = q.front();
+            q.pop();
+
+            for (int neighbor : graph.at(node)) {
+                if (distances.find(neighbor) == distances.end()) {
+                    distances[neighbor] = distances[node] + 1;
+                    q.push(neighbor);
+                }
+            }
+        }
+        return distances;
+    };
+
+    // Para cada nó, calcule a distância máxima (diâmetro)
+    for (const auto& [node, _] : graph) {
+        auto distances = bfs(node);
+        int maxDistance = 0;
+        for (const auto& [_, dist] : distances) {
+            maxDistance = std::max(maxDistance, dist);
+        }
+        diameter = std::max(diameter, maxDistance);
+    }
+
+    return diameter;
 }
 
 // Função principal
@@ -141,12 +243,22 @@ int main() {
 
     double averageClustering = clusteringNodeCount > 0 ? totalClustering / clusteringNodeCount : 0.0;
 
-    // Exibe os resultados
-    std::cout << "Número de nós no maior WCC: " << largestNodeCountWCC << "\n";
-    std::cout << "Número de arestas no maior WCC: " << largestEdgeCountWCC << "\n";
-    std::cout << "Número de nós no maior SCC: " << largestNodeCountSCC << "\n";
-    std::cout << "Número de arestas no maior SCC: " << largestEdgeCountSCC << "\n";
+    // Contagem do número de triângulos
+    int triangleCount = countTriangles(graph);
+
+    // Cálculo da fração de triângulos fechados
+    double closedTriangleFraction = fractionOfClosedTriangles(graph);
+
+    // Cálculo do diâmetro do grafo
+    int diameter = calculateDiameter(graph);
+
+    // Exibição dos resultados
+    std::cout << "Maior componente fracamente conectado (WCC) - Nós: " << largestNodeCountWCC << ", Arestas: " << largestEdgeCountWCC << "\n";
+    std::cout << "Maior componente fortemente conectado (SCC) - Nós: " << largestNodeCountSCC << ", Arestas: " << largestEdgeCountSCC << "\n";
     std::cout << "Coeficiente de agrupamento médio: " << averageClustering << "\n";
+    std::cout << "Número total de triângulos: " << triangleCount << "\n";
+    std::cout << "Fração de triângulos fechados: " << closedTriangleFraction << "\n";
+    std::cout << "Diâmetro do grafo: " << diameter << "\n";
 
     return 0;
 }
