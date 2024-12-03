@@ -8,11 +8,13 @@
 #include <cstdlib>
 #include <fstream>
 #include <unordered_map>
+#include <chrono>
 
 std::mutex queue_mutex;
 std::mutex output_mutex;
 std::queue<std::string> tasks;
 std::unordered_map<std::string, std::string> results;
+std::unordered_map<std::string, double> task_times;
 
 void execute_task(int thread_id) {
     while (true) {
@@ -32,21 +34,29 @@ void execute_task(int thread_id) {
             std::cout << "[Thread " << std::this_thread::get_id() << "] Iniciando tarefa: " << command << std::endl;
         }
 
+        // Measure time for execution
+        auto start_time = std::chrono::high_resolution_clock::now();
+
         // Execute the command
         std::ostringstream output_stream;
         output_stream << command << " > temp_output.log 2>&1";
         int ret_code = std::system(output_stream.str().c_str());
+
+        auto end_time = std::chrono::high_resolution_clock::now();
+        double duration = std::chrono::duration<double>(end_time - start_time).count();
 
         // Collect output
         std::ifstream output_file("temp_output.log");
         std::ostringstream file_content;
         file_content << output_file.rdbuf();
 
-        // Store output in results map
+        // Store output and duration in results map
         {
             std::lock_guard<std::mutex> lock(output_mutex);
             results[command] = file_content.str();
-            std::cout << "[Thread " << std::this_thread::get_id() << "] Concluída tarefa: " << command << std::endl;
+            task_times[command] = duration;
+            std::cout << "[Thread " << std::this_thread::get_id() << "] Concluída tarefa: " << command 
+                      << " em " << duration << " segundos." << std::endl;
         }
     }
 }
@@ -65,7 +75,7 @@ void display_summary() {
     std::string diameter = results["./social_network_diameter facebook_combined.txt"];
     std::string effective_diameter = results["./social_network_effective_diameter facebook_combined.txt"];
 
-    // Parse and display the relevant information
+    // Display the relevant information
     std::cout << "Nodes\t4039" << std::endl;
     std::cout << "Edges\t88234" << std::endl;
     std::cout << "Nodes in largest WCC\t4039 (1.000)" << std::endl;
@@ -77,6 +87,12 @@ void display_summary() {
     std::cout << "Fraction of closed triangles\t0.2647" << std::endl;
     std::cout << "Diameter (longest shortest path)\t8" << std::endl;
     std::cout << "90-percentile effective diameter\t4.7" << std::endl;
+
+    // Display task times
+    std::cout << "\nTempos de execução por tarefa:\n";
+    for (const auto& task_time : task_times) {
+        std::cout << task_time.first << ": " << task_time.second << " segundos." << std::endl;
+    }
 }
 
 int main() {

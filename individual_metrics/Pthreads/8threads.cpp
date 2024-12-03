@@ -7,6 +7,7 @@
 #include <sys/wait.h>
 #include <vector>
 #include <mutex>
+#include <chrono>
 
 std::queue<std::string> tasks; // Fila de tarefas
 std::mutex task_mutex;         // Mutex para proteger o acesso à fila
@@ -26,6 +27,9 @@ void* execute_task(void* arg) {
 
         std::cout << "[Thread " << pthread_self() << "] Iniciando tarefa: " << task << std::endl;
 
+        // Medir tempo de início
+        auto start_time = std::chrono::high_resolution_clock::now();
+
         // Executa o comando e captura a saída
         FILE* pipe = popen(task.c_str(), "r");
         if (!pipe) {
@@ -39,10 +43,16 @@ void* execute_task(void* arg) {
         }
         pclose(pipe);
 
-        std::cout << "[Thread " << pthread_self() << "] Concluída tarefa: " << task << std::endl;
+        // Medir tempo de término
+        auto end_time = std::chrono::high_resolution_clock::now();
+        auto elapsed_time = std::chrono::duration<double>(end_time - start_time).count();
+
+        std::cout << "[Thread " << pthread_self() << "] Concluída tarefa: " << task 
+                  << " em " << elapsed_time << " segundos." << std::endl;
 
         task_mutex.lock();
-        results.push_back("Programa: " + task + "\nSaída:\n" + output);
+        results.push_back("Programa: " + task + "\nSaída:\n" + output + 
+                          "\nTempo de execução: " + std::to_string(elapsed_time) + " segundos\n");
         task_mutex.unlock();
     }
     return nullptr;
@@ -94,4 +104,3 @@ int main() {
 
     return 0;
 }
-
