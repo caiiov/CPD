@@ -158,8 +158,8 @@ int main(int argc, char* argv[]) {
 
     if (diameter != -1) {
         std::cout << "Network Diameter: " << diameter << std::endl;
-        auto duration = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
-        std::cout << "Computation Time: " << duration.count() << " seconds" << std::endl;
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+        std::cout << "Computation Time: " << duration.count() << " milliseconds" << std::endl;
     }
 
     return 0;
