@@ -86,7 +86,7 @@ public:
                     int user1, user2;
                     
                     if (!(iss >> user1 >> user2)) {
-                        continue; // Skip invalid lines
+                        continue; // Isso aq deu mt problema, mas é para pular as linhas inválidas
                     }
 
                     local_graph[user1].push_back(user2);
@@ -115,13 +115,14 @@ public:
         return true;
     }
 
+    // Nao deu para usar o effective samples, então só faz o BFS e retorna o diâmetro
+    // Pq usando o effetivo ele nao dava o código que a gente espera, e como o BFS em paralelo já é mais rápido, nao da B.O (I Hope!!)
     int calculateDiameter() {
         if (graph.empty()) {
             std::cerr << "Error: Empty graph" << std::endl;
             return -1;
         }
 
-        // Find a node with maximum distance from a random starting point
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> dis(1, num_nodes);
@@ -130,7 +131,6 @@ public:
         std::vector<int> first_bfs = parallelBreadthFirstSearch(start_node);
         int end_point1 = findFarthestNode(first_bfs);
         
-        // From the farthest node, do another BFS to find the diameter
         std::vector<int> second_bfs = parallelBreadthFirstSearch(end_point1);
         int end_point2 = findFarthestNode(second_bfs);
 

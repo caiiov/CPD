@@ -7,14 +7,15 @@
 #include <climits>
 #include <algorithm>
 #include <string>
+#include <chrono>
 
 class SocialNetwork {
 private:
-    // Adjacency list representation of the graph
+    // Lista de adjacência 
     std::unordered_map<int, std::vector<int>> graph;
     int num_nodes;
 
-    // Breadth-First Search to find shortest paths from a given source
+    // Calcula a distância de todos os nós a partir de um nó de origem
     std::vector<int> breadthFirstSearch(int source) {
         std::vector<int> distances(num_nodes + 1, INT_MAX);
         std::queue<int> queue;
@@ -26,7 +27,7 @@ private:
             int current = queue.front();
             queue.pop();
 
-            // Explore all neighbors
+            // Para garantir que vai explorar todos os nós
             for (int neighbor : graph[current]) {
                 if (distances[neighbor] == INT_MAX) {
                     distances[neighbor] = distances[current] + 1;
@@ -41,7 +42,6 @@ private:
 public:
     SocialNetwork() : num_nodes(0) {}
 
-    // Load graph from text file with social network connections
     bool loadGraphFromFile(const std::string& filename) {
         std::ifstream file(filename);
         if (!file.is_open()) {
@@ -57,14 +57,12 @@ public:
             int user1, user2;
             
             if (!(iss >> user1 >> user2)) {
-                continue; // Skip invalid lines
+                continue; // Isso aq deu mt problema, mas é para pular as linhas inválidas (Nao use Break)
             }
 
-            // Bidirectional connection
             graph[user1].push_back(user2);
             graph[user2].push_back(user1);
 
-            // Track unique nodes
             unique_nodes[user1] = true;
             unique_nodes[user2] = true;
         }
@@ -73,7 +71,7 @@ public:
         return true;
     }
 
-    // Calculate network diameter using intelligent sampling and BFS
+    // Usando Sampling e BFS 
     int calculateDiameter() {
         if (graph.empty()) {
             std::cerr << "Error: Empty graph" << std::endl;
@@ -83,10 +81,9 @@ public:
         int max_diameter = 0;
         int effective_samples = 0;
 
-        // Intelligent node selection strategy
+        // Seleciona os nós com maior conectividade e prioriza eles
         std::vector<int> seed_nodes;
         for (const auto& entry : graph) {
-            // Prioritize nodes with high connectivity
             if (seed_nodes.empty() || 
                 entry.second.size() > graph[seed_nodes[0]].size()) {
                 if (seed_nodes.empty()) {
@@ -101,9 +98,8 @@ public:
             }
         }
 
-        // Diameter calculation using efficient sampling
+        // Aqui calcula de verdade o diâmetro
         for (int source : seed_nodes) {
-            // Find distances from current source
             std::vector<int> distances = breadthFirstSearch(source);
             
             int max_distance = 0;
@@ -113,11 +109,11 @@ public:
                 }
             }
             
-            // Update diameter
             max_diameter = std::max(max_diameter, max_distance);
             effective_samples++;
 
-            // Early termination if we have a good estimate
+            // Se encontrar uma amostra boa já para o código aqui
+            // Isso está aqui para rodar o do google melhor, mas ainda assim ta dando core bump
             if (effective_samples >= 5 && max_diameter > 0) {
                 break;
             }
@@ -126,14 +122,13 @@ public:
         return max_diameter;
     }
 
-    // Network statistics
     int getNodeCount() const { return num_nodes; }
     int getEdgeCount() const {
         int total_edges = 0;
         for (const auto& node : graph) {
             total_edges += node.second.size();
         }
-        return total_edges / 2; // Each edge counted twice
+        return total_edges / 2;
     }
 };
 
@@ -143,24 +138,28 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    auto start_time = std::chrono::high_resolution_clock::now();
+
     SocialNetwork network;
     
-    // Load graph from file
     if (!network.loadGraphFromFile(argv[1])) {
         return 1;
     }
 
-    // Display network insights
     std::cout << "Network Analysis Report:" << std::endl;
     std::cout << "---------------------" << std::endl;
     std::cout << "Total Nodes: " << network.getNodeCount() << std::endl;
     std::cout << "Total Connections: " << network.getEdgeCount() << std::endl;
 
-    // Calculate and display network diameter
     int diameter = network.calculateDiameter();
     
+    auto end_time = std::chrono::high_resolution_clock::now();
+
+
     if (diameter != -1) {
         std::cout << "Network Diameter: " << diameter << std::endl;
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
+        std::cout << "Computation Time: " << duration.count() << " seconds" << std::endl;
     }
 
     return 0;
