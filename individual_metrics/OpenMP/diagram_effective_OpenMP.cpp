@@ -17,6 +17,7 @@ private:
     std::unordered_map<int, std::unordered_set<int>> graph;
     int num_nodes;
 
+    //Continuo usando um algoritmo de busca em largura
     std::vector<int> bfsEffectiveDiameterDistances(int startNode, int maxPathLength) {
         std::vector<int> distances(num_nodes + 1, std::numeric_limits<int>::max());
         std::vector<int> reachablePaths;
@@ -29,7 +30,7 @@ private:
             auto [current, currentDist] = q.front();
             q.pop();
 
-            if (currentDist > maxPathLength) break;
+            if (currentDist > maxPathLength) break; //Nao usou paralelizacao aqui, entao nao morreu
 
             for (int neighbor : graph[current]) {
                 if (distances[neighbor] == std::numeric_limits<int>::max()) {
@@ -47,6 +48,8 @@ private:
 
         return reachablePaths;
     }
+
+    // Aqui ta usando sample nodes, pra otimizar, mas nao vai dar 100% do resultado
 
     std::vector<int> selectSeedNodes(int sample_size) {
         std::vector<std::pair<int, int>> node_degrees;
@@ -100,7 +103,7 @@ public:
     ParallelSocialNetworkDiameter() : num_nodes(0) {
         omp_set_num_threads(omp_get_max_threads());
     }
-
+    // tem segredo nao, só rodar o arquivo de texto
     bool loadGraphFromFile(const std::string& filename) {
         std::ifstream file(filename);
         if (!file.is_open()) {
@@ -123,7 +126,7 @@ public:
                     int user1, user2;
                     
                     if (!(iss >> user1 >> user2)) {
-                        continue; // Skip invalid lines
+                        continue; 
                     }
 
                     local_graph[user1].insert(user2);
@@ -150,7 +153,7 @@ public:
         num_nodes = unique_nodes.size();
         return true;
     }
-
+    // Basicamente é o diametro onde 90% dos pares de nós estão a uma distancia menor que o valor retornado
     double calculateEffectiveDiameter(double percentile = 0.9, int max_path_length = 10) {
         if (graph.empty()) {
             std::cerr << "Error: Empty graph" << std::endl;

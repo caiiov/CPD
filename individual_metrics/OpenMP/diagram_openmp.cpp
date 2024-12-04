@@ -16,6 +16,8 @@ private:
     std::unordered_map<int, std::vector<int>> graph;
     int num_nodes;
 
+    //Continuo usando um algoritmo de busca em largura, e tento paralelizar no código
+
     std::vector<int> parallelBreadthFirstSearch(int source) {
         std::vector<int> distances(num_nodes + 1, INT_MAX);
         std::vector<bool> visited(num_nodes + 1, false);
@@ -46,7 +48,7 @@ private:
 
         return distances;
     }
-
+    // Nao paralelizei
     int findFarthestNode(const std::vector<int>& distances) {
         int max_dist = 0;
         int farthest_node = 0;
