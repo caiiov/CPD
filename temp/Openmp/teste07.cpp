@@ -9,7 +9,7 @@
 #include <stack>
 #include <queue>
 #include <iomanip> 
-#include <nlohmann/json.hpp>
+#include "json.hpp"
 #include <random>
 #include <cmath> 
 #include <sys/resource.h> 
