@@ -111,4 +111,6 @@ Certifique-se de que o arquivo openmpi.cpp, web-google.txt e o Dockerfile estão
 ---
 
 ## Agradecimentos:
-Agradecemos ao Vandre e ao Leonardo por disponibilizarem os códigos que serviram como base e aplicação na atividade solicitada pelo professor. Agradecemos também ao professor Alysson pela paciência e pela ajuda em todos os momentos. 
+Agradecemos ao grupo Vandre e ao grupo de Leonardo por disponibilizarem os códigos que serviram como base e aplicação na atividade solicitada pelo professor. Agradecemos também ao professor Alysson pela paciência e pela ajuda em todos os momentos.
+--
+>No começo, Deus fez o homem e o homem acha que fez Deus E no fim, Deus foi morto pelo homem e o homem agora quer ser Deus -frankenstein
