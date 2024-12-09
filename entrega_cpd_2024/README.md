@@ -123,7 +123,7 @@ Para executar:
 - Não conseguimos fazer os containers se comunicarem, pedimos desculpas por isso.
 
 
-Certifique-se de que o arquivo openmpi.cpp, web-google.txt e o Dockerfile estão no mesmo diretório.
+- Certifique-se de que o arquivo openmpi.cpp, web-google.txt e o Dockerfile estão no mesmo diretório.
 ---
 
 ## Agradecimentos:
