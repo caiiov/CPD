@@ -1,6 +1,14 @@
 #Pthreads
 ---
 ## Pré-requisitos
+## Integrantes:
+- Pedro Manoel Benicio Dantas
+- Vitor Elbert Filgueira Lima
+- Matheus Henrique Assuncao de  Medeiros
+- Caio Victor Silvério Sobral
+- Gustavo é Gustavo Medeiros de Oliveira
+- Francisco Geibson Saraiva De Oliveira Frutuoso
+
 Docker instalado no sistema.
 No Ubuntu:
 ```bash
@@ -112,7 +120,9 @@ Para executar:
   - --rm: Remove o container automaticamente após a execução.
   - -it: Inicia o container em modo interativo.
 ```
-Não conseguimos fazer os containers se comunicarem, pedimos desculpas por isso.
+- Não conseguimos fazer os containers se comunicarem, pedimos desculpas por isso.
+
+
 Certifique-se de que o arquivo openmpi.cpp, web-google.txt e o Dockerfile estão no mesmo diretório.
 ---
 
