@@ -44,7 +44,7 @@ g++ -fopenmp -o exec openmp.cpp
 
 Para executar:
 ```bash
-./openmp.cpp
+./exec
 
 
 
