@@ -1,4 +1,4 @@
-#Pthreads
+# Pthreads
 ---
 ## Pré-requisitos
 ## Integrantes:
