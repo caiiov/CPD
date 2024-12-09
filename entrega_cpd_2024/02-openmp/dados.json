@@ -1,0 +1,23 @@
+{
+  "dataset_statistics": {
+    "arestas": 5105039,
+    "coeficiente_de_agrupamento_medio": 0.5142961475355353,
+    "diametro": 21,
+    "diametro_efetivo_90%": 9,
+    "fracao_de_triangulos-fechados": 0.0552306264884374,
+    "mais_largo_scc": {
+      "arestas": 3419124,
+      "fracao_total_de_arestas": 0.6697547266534105,
+      "fracao_total_de_nos": 0.49653025591717836,
+      "nos": 434818
+    },
+    "mais_largo_wcc": {
+      "arestas": 4291352,
+      "fracao_total_de_arestas": 0.8406110119824746,
+      "fracao_total_de_nos": 0.9772630987549574,
+      "nos": 855802
+    },
+    "nos": 875713,
+    "triangulos": 13391903
+  }
+}
